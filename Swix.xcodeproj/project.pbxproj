@@ -6,14 +6,36 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0488CEDE302A211E00951CCA /* SwiftUIKit in Frameworks */ = {isa = PBXBuildFile; productRef = 0488CEDD302A211E00951CCA /* SwiftUIKit */; };
+		7BD5A4AD9A061D24D6590928 /* MatrixRustSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 6A672D7BCC2A92F987709C93 /* MatrixRustSDK */; };
+		90B68B5C5F97C7B28A74F29D /* MatrixRustSDK in Frameworks */ = {isa = PBXBuildFile; productRef = CBBFB79131CA77E8F8D4555F /* MatrixRustSDK */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		88C1E69D6A93C79D930ACF01 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0488C05B3027A65500951CCA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0488C0623027A65500951CCA;
+			remoteInfo = Swix;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		0488C0633027A65500951CCA /* Swix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Swix.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6EFF52FE653D758F67F8A1A5 /* SwixTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwixTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0488C0653027A65500951CCA /* Swix */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Swix;
+			sourceTree = "<group>";
+		};
+		6234626200C8BFE42268AB6C /* SwixTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SwixTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -23,6 +45,16 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7BD5A4AD9A061D24D6590928 /* MatrixRustSDK in Frameworks */,
+				0488CEDE302A211E00951CCA /* SwiftUIKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		251DEFD9EFC1749B4A215A45 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				90B68B5C5F97C7B28A74F29D /* MatrixRustSDK in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				0488C0653027A65500951CCA /* Swix */,
+				6234626200C8BFE42268AB6C /* SwixTests */,
 				0488C0643027A65500951CCA /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				0488C0633027A65500951CCA /* Swix.app */,
+				6EFF52FE653D758F67F8A1A5 /* SwixTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -65,10 +99,36 @@
 			);
 			name = Swix;
 			packageProductDependencies = (
+				6A672D7BCC2A92F987709C93 /* MatrixRustSDK */,
+				0488CEDD302A211E00951CCA /* SwiftUIKit */,
 			);
 			productName = Swix;
 			productReference = 0488C0633027A65500951CCA /* Swix.app */;
 			productType = "com.apple.product-type.application";
+		};
+		7790C0BBC3AE4F3D8984C5AF /* SwixTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 57496FFF86E09CB124A2DF4B /* Build configuration list for PBXNativeTarget "SwixTests" */;
+			buildPhases = (
+				9EF978995B186F3A28B3AC0F /* Sources */,
+				251DEFD9EFC1749B4A215A45 /* Frameworks */,
+				94229DF893B5C2723525E24C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5DADD3EEFEB04F816EA694C3 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				6234626200C8BFE42268AB6C /* SwixTests */,
+			);
+			name = SwixTests;
+			packageProductDependencies = (
+				CBBFB79131CA77E8F8D4555F /* MatrixRustSDK */,
+			);
+			productName = SwixTests;
+			productReference = 6EFF52FE653D758F67F8A1A5 /* SwixTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -83,6 +143,10 @@
 					0488C0623027A65500951CCA = {
 						CreatedOnToolsVersion = 26.3;
 					};
+					7790C0BBC3AE4F3D8984C5AF = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 0488C0623027A65500951CCA;
+					};
 				};
 			};
 			buildConfigurationList = 0488C05E3027A65500951CCA /* Build configuration list for PBXProject "Swix" */;
@@ -94,18 +158,30 @@
 			);
 			mainGroup = 0488C05A3027A65500951CCA;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B2085499EEBE88B34EB5A9EA /* XCRemoteSwiftPackageReference "matrix-rust-components-swift" */,
+				0488CEDC302A211E00951CCA /* XCRemoteSwiftPackageReference "SwiftUIKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0488C0643027A65500951CCA /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				0488C0623027A65500951CCA /* Swix */,
+				7790C0BBC3AE4F3D8984C5AF /* SwixTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		0488C0613027A65500951CCA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94229DF893B5C2723525E24C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +198,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9EF978995B186F3A28B3AC0F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5DADD3EEFEB04F816EA694C3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0488C0623027A65500951CCA /* Swix */;
+			targetProxy = 88C1E69D6A93C79D930ACF01 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		0488C06E3027A65700951CCA /* Debug */ = {
@@ -256,6 +347,7 @@
 				DEVELOPMENT_TEAM = 8KZQJ4JUGS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -273,7 +365,7 @@
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -288,6 +380,7 @@
 				DEVELOPMENT_TEAM = 8KZQJ4JUGS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -305,8 +398,52 @@
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B0D25FD8F5D2A81804AB4DE0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8KZQJ4JUGS;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = hylo.SwixTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Swix.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Swix";
+			};
+			name = Debug;
+		};
+		C26DD0D874B9FBF0CF356BEB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8KZQJ4JUGS;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = hylo.SwixTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Swix.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Swix";
 			};
 			name = Release;
 		};
@@ -331,7 +468,53 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		57496FFF86E09CB124A2DF4B /* Build configuration list for PBXNativeTarget "SwixTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B0D25FD8F5D2A81804AB4DE0 /* Debug */,
+				C26DD0D874B9FBF0CF356BEB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0488CEDC302A211E00951CCA /* XCRemoteSwiftPackageReference "SwiftUIKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Hylo-dev/SwiftUIKit.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		B2085499EEBE88B34EB5A9EA /* XCRemoteSwiftPackageReference "matrix-rust-components-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/matrix-org/matrix-rust-components-swift";
+			requirement = {
+				kind = exactVersion;
+				version = 26.07.24;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0488CEDD302A211E00951CCA /* SwiftUIKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0488CEDC302A211E00951CCA /* XCRemoteSwiftPackageReference "SwiftUIKit" */;
+			productName = SwiftUIKit;
+		};
+		6A672D7BCC2A92F987709C93 /* MatrixRustSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B2085499EEBE88B34EB5A9EA /* XCRemoteSwiftPackageReference "matrix-rust-components-swift" */;
+			productName = MatrixRustSDK;
+		};
+		CBBFB79131CA77E8F8D4555F /* MatrixRustSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B2085499EEBE88B34EB5A9EA /* XCRemoteSwiftPackageReference "matrix-rust-components-swift" */;
+			productName = MatrixRustSDK;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0488C05B3027A65500951CCA /* Project object */;
 }

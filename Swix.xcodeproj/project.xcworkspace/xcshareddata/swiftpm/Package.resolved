@@ -1,0 +1,24 @@
+{
+  "originHash" : "4a25b810f9d1d1995136dca18be4fa5995b9638773fd8d3b901d9c41e2e98aa8",
+  "pins" : [
+    {
+      "identity" : "matrix-rust-components-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/matrix-org/matrix-rust-components-swift",
+      "state" : {
+        "revision" : "f5cc720a20bb349d918543998c5daa7a1f82d90e",
+        "version" : "26.7.24"
+      }
+    },
+    {
+      "identity" : "swiftuikit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Hylo-dev/SwiftUIKit.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "5a4eb24d6637411e0bd32fd88f13079aa9a2ccbd"
+      }
+    }
+  ],
+  "version" : 3
+}
