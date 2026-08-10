@@ -10,6 +10,12 @@
 /// pointer to the active account and the directories on disk.
 protocol SessionPersistenceServiceProtocol {
 
+    /// Whether an account is marked active on disk, answered without touching the keychain.
+    ///
+    /// This is the cheap synchronous question the very first frame asks to pick between the splash
+    /// and the onboarding, before the real restore has had a chance to run.
+    var hasStoredAccount: Bool { get }
+
     /// The credentials of the account marked active, or nil when nobody is signed in.
     func loadActive() throws -> PersistedSession?
 

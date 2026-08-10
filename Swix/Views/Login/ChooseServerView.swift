@@ -17,13 +17,29 @@ struct ChooseServerView: View {
     private var isHomemadeTextfieldFocus: Bool
     
     @State
-    private var isMatrixServerSelected: Bool = false
+    private var isMatrixServerSelected: Bool = true
     
     @State
     private var isHomemadeServerSelected: Bool = false
     
     @State
     private var serverURL: String = ""
+    
+    @State
+    private var showLogin: Bool = false
+    
+    @State
+    private var showRegister: Bool = false
+    
+    @State
+    private var showServerError: String? 
+
+    @State
+    private var haptics = HapticsPlayer()
+    
+    private var isNextButtonDisabled: Bool {
+        isHomemadeServerSelected && serverURL.isEmpty
+    }
     
     var body: some View {
         
@@ -61,7 +77,7 @@ struct ChooseServerView: View {
                     .padding(.vertical, 6)
                 
                 serverRow(
-                    title   : "Personal Server",
+                    title   : "Homeserver",
                     subTitle: "Your personal server",
                     isOn    : $isHomemadeServerSelected
                 )
@@ -76,53 +92,103 @@ struct ChooseServerView: View {
                     
             if isHomemadeServerSelected {
 
-                TextField(
-                    "http://matrix.yourdomain.com",
-                    text: $serverURL
-                )
-                .focused($isHomemadeTextfieldFocus)
-                .textFieldStyle(.plain)
+                VStack(spacing: 7) {
+                    TextField(
+                        "Server URL",
+                        text: $serverURL
+                    )
+                    .focused($isHomemadeTextfieldFocus)
+                    .textFieldStyle(.plain)
+                    .opacity(loginViewModel?.isLoading == true ? 0 : 1)
+                    .overlay(alignment: .leading) {
+                        if loginViewModel?.isLoading == true {
+                            CharacterBounceText(text: serverURL)
+                        }
+                    }
+                    .disabled(loginViewModel?.isLoading == true)
+                    .padding()
+                    .surface(
+                        .ultraThinMaterial,
+                        in: .roundedRect(cornerRadius: 15)
+                    )
+                    .stroke(
+                        showServerError == nil ? .clear : .red,
+                        in: .roundedRect(cornerRadius: 15)
+                    )
+                    .onAppear {
+                        isHomemadeTextfieldFocus = true
+                    }
+                    
+                    if let error = showServerError {
+                        
+                        HStack(alignment: .top) {
+                            
+                            Image(systemName: "exclamationmark.circle")
+                                .font(.caption)
+                            
+                            Text(error)
+                                .font(.caption)
+                                .fontWeight(.regular)
+                            
+                            Spacer()
+                        }
+                        .foregroundStyle(.red)
+                        .padding(.horizontal, 8)
+
+                    }
+                }
+                .clipped()
                 .transition(
                     .move(edge: .top)
                     .combined(with: .opacity)
                 )
-                .padding()
-                .surface(
-                    .ultraThinMaterial,
-                    in: .roundedRect(cornerRadius: 15)
-                )
-                .onAppear {
-                    isHomemadeTextfieldFocus = true
-                }
+                .zIndex(-1)
 
             }
+            
 
             Spacer()
+            
 
             VStack(spacing: 8) {
                             
-                NavigationLink(value: LoginState.signup) {
+                Button {
+                    nextStep($showRegister)
+                    
+                } label: {
                     Spacer()
                    
                     Text("Sign Up")
+                        .padding(.vertical, 7)
                     
                     Spacer()
                 }
                 .buttonStyle(.glass)
                 .frame(maxWidth: .infinity)
+                .disabled(isNextButtonDisabled)
                 
-                NavigationLink(value: LoginState.login) {
+                Button {
+                    nextStep($showLogin)
+                    
+                } label: {
                     Spacer()
                     
-                    HStack(spacing: 7) {
-                        Text("Login")
-                    }
+                    Text("Login")
+                        .padding(.vertical, 7)
                     
                     Spacer()
                 }
+                .disabled(isNextButtonDisabled)
                 .buttonStyle(.glassProminent)
                 .frame(maxWidth: .infinity)
             }
+            .scaleEffect(isNextButtonDisabled ? 0.97 : 1)
+            .opacity(isNextButtonDisabled ? 0.85 : 1)
+            .animation(
+                .snappy(duration: 0.25),
+                value: isNextButtonDisabled
+            )
+            
         }
         .animation(
             .snappy(duration: 0.28),
@@ -138,17 +204,31 @@ struct ChooseServerView: View {
                 isMatrixServerSelected = false
             }
         }
-        .onDisappear {
-            serverURL = isHomemadeServerSelected ? serverURL : "matrix.org"
+        .onChange(of: showRegister) { _, newValue in
             
-            Task {
-                loginViewModel?.homeserverText = serverURL
-                await loginViewModel?.discover()
+            if newValue {
+                showRegister = false
+                
+                if loginViewModel?.loginMethods?.supportsOAuth == true {
+                    Task {
+                        await loginViewModel?.signUpTapped()
+                    }
+                    
+                } else {
+                    haptics.error()
+                    showServerError = "Server not support OAuth"
+                }
             }
+        }
+        .navigationDestination(isPresented: $showLogin) {
+            LoginView()
         }
         .padding()
         
     }
+    
+    
+    // MARK: - Views
     
     private func serverRow(
         title   : String,
@@ -177,6 +257,44 @@ struct ChooseServerView: View {
             }
             
             Spacer()
+        }
+    }
+    
+    // MARK: - Handlers
+    
+    private func nextStep(_ show: Binding<Bool>) {
+        
+        showServerError = nil
+        serverURL = isHomemadeServerSelected ? serverURL : "matrix.org"
+        loginViewModel?.homeserverText = serverURL
+
+        if isHomemadeServerSelected {
+            let timing = CharacterBounceText.waveTiming(for: serverURL)
+
+            haptics.startWave(
+                travel: timing.travel,
+                period: timing.period
+            )
+        }
+
+        Task {
+            await loginViewModel?.discover()
+
+            haptics.stopWave()
+
+            if let failure = loginViewModel?.failure {
+
+                haptics.error()
+                showServerError = failure.title
+
+            } else {
+                haptics.success()
+                show.wrappedValue = true
+            }
+        }
+        
+        if isMatrixServerSelected {
+            show.wrappedValue = true
         }
         
     }

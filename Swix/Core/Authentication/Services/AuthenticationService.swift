@@ -35,10 +35,12 @@ protocol AuthenticationServiceProtocol {
         credentials: PasswordCredentials
     ) async throws
 
-    /// Asks the homeserver for the page to present, and holds the authorization open.
+    /// Asks the homeserver for the page to present, and holds the authorization open. The intent
+    /// picks between the provider's sign in and account creation forms.
     func startOAuth(
         homeserver   : String,
-        storeIdentity: SessionStoreIdentity?
+        storeIdentity: SessionStoreIdentity?,
+        intent       : OAuthIntent
     ) async throws -> OAuthAuthorizationRequest
 
     /// Finishes the OAuth login with the URL the provider redirected to.
@@ -124,9 +126,10 @@ final class AuthenticationService: AuthenticationServiceProtocol {
 
     func startOAuth(
         homeserver   : String,
-        storeIdentity: SessionStoreIdentity?
+        storeIdentity: SessionStoreIdentity?,
+        intent       : OAuthIntent
     ) async throws -> OAuthAuthorizationRequest {
-    
+
         let client = try await prepareClient(
             homeserver   : homeserver,
             storeIdentity: storeIdentity
@@ -137,14 +140,16 @@ final class AuthenticationService: AuthenticationServiceProtocol {
         let data: OAuthAuthorizationData
 
         do {
+            // Signing in passes no prompt on purpose: the provider then applies its own default,
+            // which keeps an already signed in browser session from retyping anything.
             data = try await client.urlForOauth(
                 oauthConfiguration: Self.makeOAuthConfiguration(),
-                prompt            : nil,
+                prompt            : intent == .signUp ? .create : nil,
                 loginHint         : nil,
                 deviceId          : nil,
                 additionalScopes  : nil
             )
-            
+
         } catch { throw AuthenticationFailure.wrapping(error) }
 
         let loginURL = data.loginUrl()

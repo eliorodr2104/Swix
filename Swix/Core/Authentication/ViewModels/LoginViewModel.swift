@@ -110,6 +110,18 @@ final class LoginViewModel {
         updateFailure()
     }
 
+    /// Opens the OAuth sheet on the provider's account creation form. Only meaningful on a
+    /// homeserver that offers OAuth; a password only server registers on its own website.
+    func signUpTapped() async {
+        guard !isLoading else {
+            return
+        }
+
+        await repository.signUpWithOAuth(homeserver: homeserverText)
+
+        updateFailure()
+    }
+
     /// Drops the pending login when the user leaves the screen, so no client is left half built.
     func cancel() async {
         await repository.cancel()

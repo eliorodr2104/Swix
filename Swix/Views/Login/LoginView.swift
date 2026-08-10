@@ -13,6 +13,15 @@ struct LoginView: View {
     @Environment(\.loginViewModel)
     private var loginViewModel
     
+    @FocusState
+    private var isUsernameFieldFocus: Bool
+    
+    @State
+    private var errorLoginMessage: String?
+    
+    @State
+    private var haptics = HapticsPlayer()
+    
     var body: some View {
         
         VStack(
@@ -40,7 +49,7 @@ struct LoginView: View {
                 
             }
             
-            if loginViewModel?.loginMethods?.supportsPassword == true {
+            VStack(spacing: 8) {
                 VStack {
                     
                     TextField(
@@ -51,6 +60,7 @@ struct LoginView: View {
                         )
                     )
                     .textFieldStyle(.plain)
+                    .focused($isUsernameFieldFocus)
                     
                     Divider()
                         .padding(.vertical, 6)
@@ -65,12 +75,45 @@ struct LoginView: View {
                     .textFieldStyle(.plain)
                     
                 }
+                .loadingPlaceholder(
+                    loginViewModel?.isLoading == true
+                ) {
+                    if loginViewModel?.loginMethods?.supportsPassword == true {
+                        isUsernameFieldFocus = true
+                    }
+                }
                 .padding()
                 .surface(
                     .ultraThinMaterial,
                     in: .roundedRect(cornerRadius: 15)
                 )
-                .clipped()
+                .stroke(
+                    errorLoginMessage == nil ? .clear : .red,
+                    in: .roundedRect(cornerRadius: 15)
+                )
+                .disabled(
+                    loginViewModel?.isLoading == true ||
+                    loginViewModel?.loginMethods?.supportsPassword == false
+                )
+                
+                if let error = errorLoginMessage {
+                    
+                    HStack(alignment: .top) {
+                        
+                        Image(systemName: "exclamationmark.circle")
+                            .font(.caption)
+                        
+                        Text(error)
+                            .font(.caption)
+                            .fontWeight(.regular)
+                        
+                        Spacer()
+                    }
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 8)
+                    
+                }
+                
             }
             
             HStack {
@@ -96,35 +139,53 @@ struct LoginView: View {
                 
                 Spacer()
                 
-                Image(systemName: "")
-                
-                Text("Continue in browser")
+                HStack {
+                    Image(systemName: "network")
+                    
+                    Text("Continue in browser")
+                }
+                .padding(.vertical, 7)
                 
                 Spacer()
                 
             }
             .buttonStyle(.bordered)
-            .disabled(loginViewModel?.isLoading == true)
+            .foregroundStyle(.primary)
+            .disabled(
+                loginViewModel?.isLoading == true ||
+                loginViewModel?.loginMethods?.supportsOAuth == false
+            )
                         
             Spacer()
-            
-            if loginViewModel?.loginMethods?.supportsPassword == true {
-                // username + password -> await loginViewModel?.loginTapped()
-            }
-
-            if loginViewModel?.loginMethods?.supportsOAuth == true {
-                // browser -> await loginViewModel?.oauthTapped()
-            }
-            
-            Button {  } label: {
+                        
+            Button {
+                errorLoginMessage = nil
+                
+                if loginViewModel?.loginMethods?.supportsPassword == true {
+                    Task {
+                        await loginViewModel?.loginTapped()
+                        
+                        if let failure = loginViewModel?.failure {
+                            errorLoginMessage = failure.message
+                            haptics.error()
+                        }
+                    }
+                }
+                
+            } label: {
                 Spacer()
                 
                 Text("Validate")
+                    .padding(.vertical, 7)
                 
                 Spacer()
             }
             .buttonStyle(.glassProminent)
             .frame(maxWidth: .infinity)
+            .disabled(
+                loginViewModel?.username.isEmpty ?? true ||
+                loginViewModel?.password.isEmpty ?? true
+            )
         }
         .padding()
     }

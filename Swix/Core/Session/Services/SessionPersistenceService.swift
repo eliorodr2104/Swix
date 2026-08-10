@@ -28,6 +28,10 @@ final class SessionPersistenceService: SessionPersistenceServiceProtocol {
         self.metadataStore         = metadataStore
     }
 
+    var hasStoredAccount: Bool {
+        metadataStore.activeUserID != nil
+    }
+
     func loadActive() throws -> PersistedSession? {
         guard let userID = metadataStore.activeUserID else {
             return nil

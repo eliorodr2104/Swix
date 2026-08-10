@@ -11,13 +11,12 @@ struct HomeView: View {
     
     @State
     private var navigation: NavigationState = .chats
-    
-    
+
+
     // TODO: - Move this into vm for custom search
     @State
     private var query: String = ""
-    
-    
+
     var body: some View {
         
         TabView {

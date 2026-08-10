@@ -47,6 +47,21 @@ final class SessionViewModel {
         return false
     }
 
+    /// Whether the homeserver took the session away rather than the user leaving on their own.
+    ///
+    /// Bind it to the "session expired" alert: setting it back to false is how the alert
+    /// dismisses, so it plugs straight into `alert(isPresented:)`.
+    var sessionWasRevoked: Bool {
+        get { repository.sessionWasRevoked }
+        set {
+            guard !newValue else {
+                return
+            }
+
+            repository.acknowledgeSessionRevocation()
+        }
+    }
+
     /// Restores the stored session at launch.
     func restore() async {
         await repository.restoreIfPossible()

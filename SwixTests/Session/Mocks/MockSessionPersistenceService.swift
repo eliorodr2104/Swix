@@ -15,6 +15,9 @@ final class MockSessionPersistenceService: SessionPersistenceServiceProtocol {
     /// Every call this mock received, in order.
     private(set) var calls: [Call] = []
 
+    /// What `hasStoredAccount` reports. Staged directly, since the real one is a plain lookup.
+    var hasStoredAccount = false
+
     /// What `loadActive()` hands back, or the error it throws.
     var loadActiveResult: Result<PersistedSession?, any Error> = .success(nil)
 

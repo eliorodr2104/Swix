@@ -10,6 +10,5 @@ enum LoginState: String, Hashable {
     case qrScaning
     case chooseServer
     case login
-    case signup
     
 }

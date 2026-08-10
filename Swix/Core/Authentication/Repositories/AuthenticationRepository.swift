@@ -94,11 +94,35 @@ final class AuthenticationRepository {
 
     /// Runs the whole OAuth round trip, from the authorization page to the adopted session.
     func signInWithOAuth(homeserver: String) async {
-        
+
+        await runOAuth(
+            homeserver: homeserver,
+            intent    : .signIn
+        )
+    }
+
+    /// The same round trip opened on the provider's account creation form instead.
+    ///
+    /// Registration lives on the homeserver's own web page, so a successful sign up comes back
+    /// here as a session already signed in: nothing after the callback differs from a login.
+    func signUpWithOAuth(homeserver: String) async {
+
+        await runOAuth(
+            homeserver: homeserver,
+            intent    : .signUp
+        )
+    }
+
+    private func runOAuth(
+        homeserver: String,
+        intent    : OAuthIntent
+    ) async {
+
         await perform {
             let request = try await self.authenticationService.startOAuth(
                 homeserver   : homeserver,
-                storeIdentity: self.resolveStoreIdentity()
+                storeIdentity: self.resolveStoreIdentity(),
+                intent       : intent
             )
 
             let callbackURL: URL

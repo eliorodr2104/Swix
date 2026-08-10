@@ -23,6 +23,25 @@ final class SessionRepository {
     /// The last failure that changed the state, kept until the next attempt clears it.
     private(set) var failure: SessionFailure?
 
+    /// Whether the homeserver took the session away, as opposed to the user leaving on their own.
+    ///
+    /// Raised on both flavours of remote expiry, cleared by a sign in, a sign out, or the view
+    /// acknowledging it. This is what lets the login screen open on a "something went wrong" alert
+    /// only when coming back was not the user's idea.
+    private(set) var sessionWasRevoked = false
+
+    /// Whether an account is marked active on disk and the restore has not landed anywhere yet.
+    ///
+    /// The very first frame reads this to choose the splash over the onboarding. It turns false as
+    /// soon as the state is terminal, so a failed restore falls through to the sign in instead of
+    /// leaving the splash on screen forever.
+    var hasStoredAccount: Bool {
+        switch state {
+            case .none, .restoring: persistenceService.hasStoredAccount
+            default               : false
+        }
+    }
+
     @ObservationIgnored
     private let clientService: any ClientServiceProtocol
 
@@ -92,8 +111,14 @@ final class SessionRepository {
             storeIdentity: storeIdentity
         )
 
-        failure = nil
-        state   = .authenticated(PersistedSessionMapper.makeUserSession(from: persisted))
+        failure           = nil
+        sessionWasRevoked = false
+        state             = .authenticated(PersistedSessionMapper.makeUserSession(from: persisted))
+    }
+
+    /// Lowers the revocation flag once the user has seen the alert it raised.
+    func acknowledgeSessionRevocation() {
+        sessionWasRevoked = false
     }
 
     /// Ends the session on the homeserver and erases every local trace of it.
@@ -106,6 +131,8 @@ final class SessionRepository {
         } catch {
             record(error)
         }
+
+        sessionWasRevoked = false
 
         forgetSession()
     }
@@ -140,6 +167,8 @@ final class SessionRepository {
         guard let userSession = state.userSession else {
             return
         }
+
+        sessionWasRevoked = true
 
         guard isSoftLogout else {
             forgetSession()

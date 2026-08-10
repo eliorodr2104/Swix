@@ -27,6 +27,15 @@ final class CoreContainer {
     /// wholesale rather than emptied, so holding onto one across sessions keeps a dead client alive.
     private(set) var scope: UserSessionScope?
 
+    /// Whether a stored account exists and is still being brought back.
+    ///
+    /// This is the first frame's question: true means "show the splash, the app is coming", and it
+    /// goes false the moment the restore lands anywhere, so a failed restore falls through to the
+    /// sign in instead of stranding the user on the splash.
+    var hasStoredAccount: Bool {
+        sessionRepository.hasStoredAccount
+    }
+
     /// What a root view binds to in order to choose between the splash, the login and the app.
     @ObservationIgnored
     let sessionViewModel: SessionViewModel

@@ -44,7 +44,7 @@ struct OnboardingView: View {
             
             Spacer()
             
-            VStack(spacing: 8) {
+            VStack(spacing: 10) {
                 NavigationLink(value: LoginState.qrScaning) {
                     Spacer()
                     
@@ -52,6 +52,7 @@ struct OnboardingView: View {
                         Image(systemName: "qrcode")
                         Text("Scan QR-Code")
                     }
+                    .padding(.vertical, 7)
                     
                     Spacer()
                 }
@@ -62,6 +63,7 @@ struct OnboardingView: View {
                     Spacer()
                    
                     Text("Next")
+                        .padding(.vertical, 7)
                     
                     Spacer()
                 }
