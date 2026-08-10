@@ -13,8 +13,15 @@ struct LoginView: View {
     @Environment(\.loginViewModel)
     private var loginViewModel
     
+    /// The two fields the keyboard can serve, so the return key can hand focus down the form.
+    private enum Field {
+
+        case username
+        case password
+    }
+
     @FocusState
-    private var isUsernameFieldFocus: Bool
+    private var focusedField: Field?
     
     @State
     private var errorLoginMessage: String?
@@ -60,11 +67,16 @@ struct LoginView: View {
                         )
                     )
                     .textFieldStyle(.plain)
-                    .focused($isUsernameFieldFocus)
-                    
+                    .focused($focusedField, equals: .username)
+                    .textContentType(.username)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .submitLabel(.next)
+                    .onSubmit { focusedField = .password }
+
                     Divider()
                         .padding(.vertical, 6)
-                    
+
                     SecureField(
                         "Password",
                         text: Binding(
@@ -73,13 +85,17 @@ struct LoginView: View {
                         )
                     )
                     .textFieldStyle(.plain)
-                    
+                    .focused($focusedField, equals: .password)
+                    .textContentType(.password)
+                    .submitLabel(.go)
+                    .onSubmit { submitLogin() }
+
                 }
                 .loadingPlaceholder(
                     loginViewModel?.isLoading == true
                 ) {
                     if loginViewModel?.loginMethods?.supportsPassword == true {
-                        isUsernameFieldFocus = true
+                        focusedField = .username
                     }
                 }
                 .padding()
@@ -158,35 +174,45 @@ struct LoginView: View {
                         
             Spacer()
                         
-            Button {
-                errorLoginMessage = nil
-                
-                if loginViewModel?.loginMethods?.supportsPassword == true {
-                    Task {
-                        await loginViewModel?.loginTapped()
-                        
-                        if let failure = loginViewModel?.failure {
-                            errorLoginMessage = failure.message
-                            haptics.error()
-                        }
-                    }
-                }
-                
-            } label: {
-                Spacer()
-                
-                Text("Validate")
-                    .padding(.vertical, 7)
-                
-                Spacer()
-            }
-            .buttonStyle(.glassProminent)
-            .frame(maxWidth: .infinity)
-            .disabled(
-                loginViewModel?.username.isEmpty ?? true ||
-                loginViewModel?.password.isEmpty ?? true
-            )
+//            Button {
+//                errorLoginMessage = nil
+//                
+//                submitLogin()
+//
+//            } label: {
+//                Spacer()
+//
+//                Text("Validate")
+//                    .padding(.vertical, 7)
+//
+//                Spacer()
+//            }
+//            .buttonStyle(.glassProminent)
+//            .frame(maxWidth: .infinity)
+//            .disabled(
+//                loginViewModel?.username.isEmpty ?? true ||
+//                loginViewModel?.password.isEmpty ?? true
+//            )
         }
         .padding()
+    }
+
+    /// One entry point for the button and the keyboard's go key, so the two can never diverge.
+    private func submitLogin() {
+
+        guard loginViewModel?.loginMethods?.supportsPassword == true,
+              loginViewModel?.username.isEmpty == false,
+              loginViewModel?.password.isEmpty == false else {
+            return
+        }
+
+        Task {
+            await loginViewModel?.loginTapped()
+
+            if let failure = loginViewModel?.failure {
+                errorLoginMessage = failure.message
+                haptics.error()
+            }
+        }
     }
 }

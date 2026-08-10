@@ -99,6 +99,18 @@ struct ChooseServerView: View {
                     )
                     .focused($isHomemadeTextfieldFocus)
                     .textFieldStyle(.plain)
+                    .keyboardType(.URL)
+                    .textContentType(.URL)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .submitLabel(.go)
+                    .onSubmit {
+                        guard !isNextButtonDisabled else {
+                            return
+                        }
+
+                        nextStep($showLogin)
+                    }
                     .opacity(loginViewModel?.isLoading == true ? 0 : 1)
                     .overlay(alignment: .leading) {
                         if loginViewModel?.isLoading == true {
@@ -202,6 +214,10 @@ struct ChooseServerView: View {
         .onChange(of: isHomemadeServerSelected) { _, newValue in
             if newValue && isMatrixServerSelected {
                 isMatrixServerSelected = false
+            }
+
+            if !newValue {
+                isHomemadeTextfieldFocus = false
             }
         }
         .onChange(of: showRegister) { _, newValue in
