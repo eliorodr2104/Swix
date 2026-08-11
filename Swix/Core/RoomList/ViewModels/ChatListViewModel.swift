@@ -26,6 +26,11 @@ final class ChatListViewModel {
     @ObservationIgnored
     private let syncRepository: SyncRepository?
 
+    /// Muting is a notification rule rather than a room flag, so it comes from the notifications
+    /// feature. Optional because a list can be shown without one, muting simply does nothing then.
+    @ObservationIgnored
+    private let notificationSettingsRepository: NotificationSettingsRepository?
+
     @ObservationIgnored
     private let searchDebounce: Duration
 
@@ -39,15 +44,17 @@ final class ChatListViewModel {
     private var visibleRoomIDs: [String] = []
 
     init(
-        repository    : RoomListRepository,
-        actionsService: any RoomActionsServiceProtocol,
-        syncRepository: SyncRepository? = nil,
-        searchDebounce: Duration = .milliseconds(300)
+        repository                    : RoomListRepository,
+        actionsService                : any RoomActionsServiceProtocol,
+        syncRepository                : SyncRepository? = nil,
+        notificationSettingsRepository: NotificationSettingsRepository? = nil,
+        searchDebounce                : Duration = .milliseconds(300)
     ) {
-        self.repository     = repository
-        self.actionsService = actionsService
-        self.syncRepository = syncRepository
-        self.searchDebounce = searchDebounce
+        self.repository                     = repository
+        self.actionsService                 = actionsService
+        self.syncRepository                 = syncRepository
+        self.notificationSettingsRepository = notificationSettingsRepository
+        self.searchDebounce                 = searchDebounce
     }
 
     /// Bound to the search field.
@@ -121,6 +128,79 @@ final class ChatListViewModel {
         await run {
             try await actionsService.markAsRead(roomID: roomID)
             try await actionsService.setUnreadFlag(false, roomID: roomID)
+        }
+    }
+
+    /// Marks a room as unread by hand, the way Mail does: the counters stay as they are, the room
+    /// simply carries a dot until it is opened again.
+    func markAsUnread(roomID: String) async {
+        await run {
+            try await actionsService.setUnreadFlag(true, roomID: roomID)
+        }
+    }
+
+    /// Whether a room is currently muted, for a menu that has to name the action it offers.
+    ///
+    /// Answers false until the room's setting has been loaded, so call `loadNotificationSetting`
+    /// before showing a menu that depends on it.
+    func isMuted(roomID: String) -> Bool {
+        notificationSettingsRepository?.roomSettings[roomID]?.mode == .mute
+    }
+
+    /// Fetches one room's notification mode, which is what makes `isMuted(roomID:)` meaningful.
+    func loadNotificationSetting(for summary: RoomSummary) async {
+        await notificationSettingsRepository?.load(
+            roomID     : summary.id,
+            isEncrypted: summary.isEncrypted,
+            isOneToOne : summary.isDirect
+        )
+    }
+
+    /// Silences a room or gives it its voice back.
+    ///
+    /// Unmuting is its own SDK call rather than a mode change: it restores whatever the account
+    /// default is for this kind of room, which is not necessarily "all messages".
+    func toggleMute(for summary: RoomSummary) async {
+        guard let notificationSettingsRepository else {
+            return
+        }
+
+        guard isMuted(roomID: summary.id) else {
+            await notificationSettingsRepository.setMode(
+                roomID: summary.id,
+                mode  : .mute
+            )
+
+            return
+        }
+
+        await notificationSettingsRepository.unmute(
+            roomID     : summary.id,
+            isEncrypted: summary.isEncrypted,
+            isOneToOne : summary.isDirect
+        )
+    }
+
+    /// Pushes a room to the bottom of the list or brings it back, which is the closest thing
+    /// Matrix has to archiving: the room stays joined and messages keep arriving.
+    func toggleArchive(roomID: String) async {
+        guard let summary = repository.rooms.first(where: { $0.id == roomID }) else {
+            return
+        }
+
+        await run {
+            try await actionsService.setLowPriority(!summary.isLowPriority, roomID: roomID)
+        }
+    }
+
+    /// Leaves a room, which is as close to deleting a chat as Matrix gets.
+    ///
+    /// Nothing is erased for anyone else, and a private room may need a fresh invite to come back
+    /// to, so this deserves a confirmation before it is called. The row disappears on the next
+    /// diff, since every filter excludes rooms the user has left.
+    func leave(roomID: String) async {
+        await run {
+            try await actionsService.leave(roomID: roomID)
         }
     }
 

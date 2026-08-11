@@ -15,6 +15,9 @@ final class RoomListEntriesService: RoomListEntriesServiceProtocol {
 
     private let coordinator: any SyncCoordinatorProtocol
 
+    /// Whose account the list belongs to, needed to tell the other member of a direct room apart.
+    private let ownUserID: String
+
     private let pageSize: UInt32
 
     private let diffStream: AsyncStream<[CollectionDiff<RoomSummary>]>
@@ -41,9 +44,11 @@ final class RoomListEntriesService: RoomListEntriesServiceProtocol {
 
     init(
         coordinator: any SyncCoordinatorProtocol,
+        ownUserID  : String,
         pageSize   : UInt32 = MatrixConfiguration.roomListPageSize
     ) {
         self.coordinator = coordinator
+        self.ownUserID   = ownUserID
         self.pageSize    = pageSize
 
         (diffStream, diffContinuation) = AsyncStream<[CollectionDiff<RoomSummary>]>.makeStream(bufferingPolicy: .unbounded)
@@ -129,7 +134,7 @@ final class RoomListEntriesService: RoomListEntriesServiceProtocol {
 
         subscriptions.retain(Task { [diffContinuation] in
             for await update in updates {
-                diffContinuation.yield(await RoomListDiffMapper.makeDiffs(from: update))
+                diffContinuation.yield(await RoomListDiffMapper.makeDiffs(from: update, ownUserID: ownUserID))
             }
         })
     }

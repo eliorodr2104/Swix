@@ -117,6 +117,10 @@ final class UserSessionScope {
     /// What an ignored users screen binds to.
     let ignoredUsersViewModel: IgnoredUsersViewModel
 
+    /// Authenticated media downloads and thumbnails, the layer image views load through: Matrix
+    /// media lives behind mxc URIs and the account's token, out of reach of any plain URL loader.
+    let mediaService: MediaService
+
     /// Uploads, downloads, thumbnails and the on disk thumbnail cache.
     let mediaRepository: MediaRepository
 
@@ -155,7 +159,10 @@ final class UserSessionScope {
         self.syncRepository          = syncRepository
         self.syncLifecycleController = SyncLifecycleController(repository: syncRepository)
 
-        let roomListEntriesService = RoomListEntriesService(coordinator: syncCoordinator)
+        let roomListEntriesService = RoomListEntriesService(
+            coordinator: syncCoordinator,
+            ownUserID  : userSession.userID
+        )
         let roomListRepository     = RoomListRepository(entriesService: roomListEntriesService)
 
         let roomActionsService = RoomActionsService(
@@ -166,10 +173,22 @@ final class UserSessionScope {
         self.roomActionsService = roomActionsService
         self.roomListRepository = roomListRepository
 
+        // Built before the chat list because muting a room from its context menu is a
+        // notification rule, not a room flag.
+        let notificationSettingsRepository = NotificationSettingsRepository(
+            settingsService: NotificationSettingsService(clientService: clientService)
+        )
+
+        self.notificationSettingsRepository = notificationSettingsRepository
+        self.notificationSettingsViewModel  = NotificationSettingsViewModel(
+            repository: notificationSettingsRepository
+        )
+
         self.chatListViewModel = ChatListViewModel(
-            repository    : roomListRepository,
-            actionsService: roomActionsService,
-            syncRepository: syncRepository
+            repository                    : roomListRepository,
+            actionsService                : roomActionsService,
+            syncRepository                : syncRepository,
+            notificationSettingsRepository: notificationSettingsRepository
         )
 
         let timelineProvider = TimelineProvider(
@@ -205,15 +224,6 @@ final class UserSessionScope {
         self.callViewModel  = CallViewModel(repository: callRepository)
 
         self.threadSubscriptionService = ThreadSubscriptionService(roomProvider: syncCoordinator)
-
-        let notificationSettingsRepository = NotificationSettingsRepository(
-            settingsService: NotificationSettingsService(clientService: clientService)
-        )
-
-        self.notificationSettingsRepository = notificationSettingsRepository
-        self.notificationSettingsViewModel  = NotificationSettingsViewModel(
-            repository: notificationSettingsRepository
-        )
 
         self.pusherService           = PusherService(clientService: clientService)
         self.notificationItemService = NotificationItemService(clientService: clientService)
@@ -255,9 +265,10 @@ final class UserSessionScope {
         self.ignoredUsersRepository = ignoredUsersRepository
         self.ignoredUsersViewModel  = IgnoredUsersViewModel(repository: ignoredUsersRepository)
 
-        self.mediaRepository = MediaRepository(
-            mediaService: MediaService(clientService: clientService)
-        )
+        let mediaService = MediaService(clientService: clientService)
+
+        self.mediaService    = mediaService
+        self.mediaRepository = MediaRepository(mediaService: mediaService)
 
         self.contentScannerService = ContentScannerService(clientService: clientService)
 

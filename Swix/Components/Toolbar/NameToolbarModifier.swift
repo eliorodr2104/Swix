@@ -21,13 +21,13 @@ private struct NameToolbarModifier: ViewModifier {
                 
                 ToolbarItem(placement: .title) {
                     
-                    HStack {
+                    HStack() {
                         Text(name)
                             .fontWeight(.bold)
                             .fontDesign(.default)
                             .font(.largeTitle)
                         
-                        Text(String(repeating: " ", count: 2))
+                        Text(String(repeating: " ", count: 20))                        
                     }
                 }
                 .sharedBackgroundVisibility(.hidden)

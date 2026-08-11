@@ -59,4 +59,8 @@ extension EnvironmentValues {
 
     /// User directory search.
     @Entry var userSearchViewModel: UserSearchViewModel? = nil
+
+    /// Authenticated Matrix media, for the image views: avatars and attachments are mxc URIs
+    /// behind the account's token, so they load through the Core rather than through a URL.
+    @Entry var mediaService: (any MediaServiceProtocol)? = nil
 }

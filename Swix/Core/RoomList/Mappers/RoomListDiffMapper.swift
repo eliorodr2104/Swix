@@ -17,13 +17,16 @@ enum RoomListDiffMapper {
     /// Mapping has to be asynchronous because every summary needs the room's info and latest
     /// event, so the whole batch is resolved here and reaches the repository as a single atomic
     /// update instead of trickling into the list room by room.
-    static func makeDiffs(from updates: [RoomListEntriesUpdate]) async -> [CollectionDiff<RoomSummary>] {
+    static func makeDiffs(
+        from updates: [RoomListEntriesUpdate],
+        ownUserID   : String
+    ) async -> [CollectionDiff<RoomSummary>] {
         var diffs: [CollectionDiff<RoomSummary>] = []
 
         diffs.reserveCapacity(updates.count)
 
         for update in updates {
-            diffs.append(await makeDiff(from: update))
+            diffs.append(await makeDiff(from: update, ownUserID: ownUserID))
         }
 
         return diffs
@@ -39,19 +42,22 @@ enum RoomListDiffMapper {
 
     /// Maps a single SDK update to its domain equivalent, resolving whichever room payload it
     /// carries along the way.
-    private static func makeDiff(from update: RoomListEntriesUpdate) async -> CollectionDiff<RoomSummary> {
+    private static func makeDiff(
+        from update: RoomListEntriesUpdate,
+        ownUserID  : String
+    ) async -> CollectionDiff<RoomSummary> {
         switch update {
             case .append(let values):
-                return .append(await makeSummaries(from: values))
+                return .append(await makeSummaries(from: values, ownUserID: ownUserID))
 
             case .clear:
                 return .clear
 
             case .pushFront(let value):
-                return .pushFront(await RoomSummaryMapper.makeSummary(from: value))
+                return .pushFront(await RoomSummaryMapper.makeSummary(from: value, ownUserID: ownUserID))
 
             case .pushBack(let value):
-                return .pushBack(await RoomSummaryMapper.makeSummary(from: value))
+                return .pushBack(await RoomSummaryMapper.makeSummary(from: value, ownUserID: ownUserID))
 
             case .popFront:
                 return .popFront
@@ -60,10 +66,10 @@ enum RoomListDiffMapper {
                 return .popBack
 
             case .insert(let index, let value):
-                return .insert(index: Int(index), element: await RoomSummaryMapper.makeSummary(from: value))
+                return .insert(index: Int(index), element: await RoomSummaryMapper.makeSummary(from: value, ownUserID: ownUserID))
 
             case .set(let index, let value):
-                return .set(index: Int(index), element: await RoomSummaryMapper.makeSummary(from: value))
+                return .set(index: Int(index), element: await RoomSummaryMapper.makeSummary(from: value, ownUserID: ownUserID))
 
             case .remove(let index):
                 return .remove(index: Int(index))
@@ -72,19 +78,22 @@ enum RoomListDiffMapper {
                 return .truncate(length: Int(length))
 
             case .reset(let values):
-                return .reset(await makeSummaries(from: values))
+                return .reset(await makeSummaries(from: values, ownUserID: ownUserID))
         }
     }
 
     /// Resolves a whole page of rooms in order, which is what keeps an `append` or `reset` batch
     /// atomic instead of letting rows trickle into the list one at a time.
-    private static func makeSummaries(from rooms: [Room]) async -> [RoomSummary] {
+    private static func makeSummaries(
+        from rooms: [Room],
+        ownUserID : String
+    ) async -> [RoomSummary] {
         var summaries: [RoomSummary] = []
 
         summaries.reserveCapacity(rooms.count)
 
         for room in rooms {
-            summaries.append(await RoomSummaryMapper.makeSummary(from: room))
+            summaries.append(await RoomSummaryMapper.makeSummary(from: room, ownUserID: ownUserID))
         }
 
         return summaries

@@ -16,8 +16,8 @@ import SwiftUI
 /// inside the placeholder instead of washing over whatever is behind it.
 ///
 /// A placeholder that comes and goes in a few hundredths of a second reads as a glitch rather than
-/// as loading, so it always runs for at least one full pass of the band, and the real wait is added
-/// on top of that.
+/// as loading, so it always stays up just long enough to read as intentional, and the real wait is
+/// added on top of that.
 struct LoadingPlaceholderModifier: ViewModifier {
 
     /// Whether the work being waited on is still in flight.
@@ -230,7 +230,7 @@ struct LoadingPlaceholderModifier: ViewModifier {
     private static let contentBlur: CGFloat = 4
 
     /// Seconds one pass of the band takes, end to end.
-    private static let cycle: Double = 1.9
+    private static let cycle: Double = 1.2
 
     /// Width of the band as a fraction of the content it crosses.
     private static let bandWidth: Double = 0.55
@@ -249,7 +249,7 @@ extension View {
     /// judge a half transitioned tree and throw the request away.
     func loadingPlaceholder(
         _ isActive     : Bool,
-        minimumDuration: Duration = .seconds(1.9),
+        minimumDuration: Duration = .seconds(0.6),
         onReveal       : (() -> Void)? = nil
     ) -> some View {
 

@@ -41,6 +41,10 @@ struct ContentView: View {
                         \.sessionVerificationViewModel,
                          scope.sessionVerificationViewModel
                     )
+                    .environment(
+                        \.mediaService,
+                         scope.mediaService
+                    )
 
             } else if isShowingSplash {
 
